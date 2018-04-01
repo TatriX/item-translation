@@ -6,31 +6,19 @@ var router = express.Router();
 var Item = require('./schema')
  
 
-router.post('/:eng/:ru', function(req, res, next) { 
-        Item.find({
-            "nameEng": req.params.eng
-        }, function(err, found) {
+router.post('/:eng/:ru', function(req, res, next) {  
+        Item.find({}, function(err, found) {
             if (err) {
                 return console.error(err)
             };
-            if (found.length < 1) {
-                const newValue = new Item({
-                    "nameEng": req.params.eng,
-                    "translations": [{
-                        "variant": req.params.ru,
-                        "count": 1
-                    }]
-                });
-                newValue.save(function(err, found) {
-                    if (err) return console.error(err);
-                    res.json({
-                        "WRITTEN": newValue.nameEng
-                    });
-                });
-
-            } else {
-                if (found[0].translations.find(o => o.variant == req.params.ru) === undefined) {
-                    Item.findOneAndUpdate({
+            //Проверка элемента в бд
+            const requiredItem = found.find(e=>e.nameEng == req.params.eng);
+             if(!requiredItem) {res.json({"Element Not Found":req.params.eng}); next();}
+              //Существует ли вариант перевода в бд 
+             const variant = requiredItem.translations.find(e=>e.variant == req.params.ru); 
+             //Добавить несуществующий вариант перевода
+                if (!variant) {
+					 Item.findOneAndUpdate({
                         "nameEng": req.params.eng
                     }, {
                         $push: {
@@ -43,10 +31,28 @@ router.post('/:eng/:ru', function(req, res, next) {
                         if (err) return res.send(500, {
                             error: err
                         });
-                        return res.send("added");
+                        return res.json({"variant":"added"});
                     });
-                }
-            }
+					}
+					////////////
+					//////  Плюс 1 к существующему варианту
+					else {
+						 Item.findOneAndUpdate({
+                        "nameEng": req.params.eng,
+                        "translations.variant": req.params.ru
+                    }, {
+                        $inc: {    
+							  "translations.$.count": 1
+                        }
+                    }, function(err, doc) {
+                        if (err) return res.send(500, {
+                            error: err
+                        });
+                        return res.json({"variant":"increased"});
+                    });
+						}
+						///////
+             
         })
 
      
