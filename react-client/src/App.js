@@ -13,7 +13,7 @@ class Row extends React.Component {
         constructor(props) {
             super(props);
             this.state = {
-                ru: ''  
+                ru: '' 
             };
         } 
         change = (e) => {  
@@ -29,15 +29,15 @@ class Row extends React.Component {
                 method: 'POST'
             }).then(() => this.props.makeActive(this.props.item)) 
         } 
-        submitVariant = (e) => {
-			 fetch('/translation/' + this.props.item + '/' + e.target.value, {
+        submitVariant = () => {
+			 fetch('/translation/' + this.props.item + '/' + this.props.extraVariant, {
                 method: 'POST'
-            }).then(() => this.props.makeActive(this.props.item)) 
+            }).then(()=> this.props.updateVariants(this.props.item))
 			}
         render() {
 			 var makeActive = this.props.makeActive;
-                return <tr>
-                    < td onClick={() => makeActive(this.props.item)} > {
+                return <tr className={this.props.isActive}>
+                    < td   onClick={() => makeActive(this.props.item)} > {
                         this.props.item
                     } < /td>
     <td><input type='text'  onChange={this.change} value={this.state.ru}  /> < /td>
@@ -45,7 +45,7 @@ class Row extends React.Component {
                     < button id='submitButton' onClick = {
                         this.submit
                     } > Submit < /button></td > 
-                    {this.props.extraVariant ? <td>{this.props.extraVariant} <button id="plusOne" onClick={(e)=>this.submitVariant}>{this.props.count}</button> </td> : null}
+                    {this.props.extraVariant ? <td >{this.props.extraVariant} <button className="plusOne"   onClick={this.submitVariant}>{this.props.count}</button> </td> : null}
                     < /tr>
   }
 }
@@ -66,9 +66,7 @@ class App extends Component {
   }
   
  makeActive(someItem) { 
-    this.setState({ active: someItem },()=>this.fetchVariants(this.state.active));  
-    console.log(this.state.variants); 
-    console.log(this.state.counts);
+    this.setState({ active: someItem },()=>this.fetchVariants(this.state.active));   
   }
   fetchVariants(parent) {
 	  fetch('/users/'+parent, {
@@ -89,7 +87,7 @@ class App extends Component {
   </tr>
       </thead>
    <tbody>
-       {this.state.items.map((a,index)  => <Row key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)} extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
+       {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)} isActive={a.nameEng === this.state.active ? 'active' : null} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)} extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
         </tbody>
 </table>
       </div>

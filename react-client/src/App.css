@@ -19,7 +19,8 @@ max-width: 1500px;
 
 #entireTable tr:nth-child(even){background-color: #f2f2f2;}
 
-#entireTable tr:hover {background-color: #ddd;}
+#entireTable  td:nth-child(1):hover
+{background-color: #ddd;}
 
 #entireTable th { 
     padding-top: 12px;
@@ -55,6 +56,9 @@ background-color: #4CAF50;
 #submitButton:hover {
 background-color: #1E7520;  
 }
- #plusOne {
+ .plusOne {
  background-color: #2679D8;
  }
+.active td:nth-child(1),.active td:nth-child(2),.active td:nth-child(3) {
+background-color: #ddd !important;
+}
