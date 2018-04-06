@@ -1,4 +1,4 @@
- var express = require('express');
+var express = require('express');
 var router = express.Router(); 
 var Item = require('./schema')
 
@@ -25,8 +25,7 @@ router.post('/:specifiedItem',function(req,res,next){
                         if (err) return res.send(500, {
                             error: err
                         });
-                        const requestedVariants = found[0].translations;
-                        console.log(requestedVariants.map(e=>e.count)); 
+                        const requestedVariants = found[0].translations; 
                         return res.send(requestedVariants);
                     });
 });

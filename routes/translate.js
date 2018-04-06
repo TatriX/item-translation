@@ -1,7 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
-var mongoose = require('mongoose');
+var path = require('path'); 
 var router = express.Router(); 
 var Item = require('./schema')
  

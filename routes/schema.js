@@ -7,10 +7,9 @@ var itemSchema = new mongoose.Schema({
         "variant": String,
         "count": Number,
         _id: false
-    }]
-}, {
-    versionKey: false
-});
+    }],  versionKey: false
+},  
+           { collection : "Russian" });
 
 var Item = mongoose.model('Item', itemSchema);
 

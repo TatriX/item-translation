@@ -1,5 +1,5 @@
 var createError = require('http-errors');
- var express = require('express');
+var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -8,6 +8,7 @@ var connect = mongoose.connect("mongodb://username:password@ds135830.mlab.com:35
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var translationRouter = require('./routes/translate');
+var downloadRouter = require('./routes/download');
  
 var app = express();
 
@@ -22,8 +23,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/download', downloadRouter);
 app.use('/users', usersRouter);
-app.use('/translation', translationRouter)
+app.use('/translation', translationRouter);
 
 
 app.use(function(req, res, next) {

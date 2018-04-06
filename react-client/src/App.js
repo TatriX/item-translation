@@ -6,8 +6,8 @@ import ReactDOM from 'react-dom';
 
 
 import './App.css';
-
  
+
 
 class Row extends React.Component {
         constructor(props) {
@@ -73,6 +73,10 @@ class App extends Component {
                 method: 'POST'
             }).then(res=>res.json()).then(json=> this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})  );
 	  }
+
+ 
+ 
+ 
   render() { 
     return (
       <div>
@@ -88,6 +92,7 @@ class App extends Component {
       </thead>
    <tbody>
        {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)} isActive={a.nameEng === this.state.active ? 'active' : null} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)} extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
+         <a target='_blank'  rel="noopener noreferrer" href='http://localhost:3001/download' download='dist.json'>скачать </a>  
         </tbody>
 </table>
       </div>
