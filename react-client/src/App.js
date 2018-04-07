@@ -44,8 +44,9 @@ class Row extends React.Component {
     <td><button onClick={this.reset}  id='resetButton'>Reset</button >
                     < button id='submitButton' onClick = {
                         this.submit
-                    } > Submit < /button></td > 
-                    {this.props.extraVariant ? <td >{this.props.extraVariant} <button className="plusOne"   onClick={this.submitVariant}>{this.props.count}</button> </td> : null}
+                    } > Submit < /button></td >  
+                    {!this.props.extraVariant ?  null :  !this.props.count ?  <td>{this.props.extraVariant}</td> : <td> {this.props.extraVariant} <button className="plusOne"   onClick={this.submitVariant}>{this.props.count}</button></td>} 
+                     
                     < /tr>
   }
 }
@@ -62,7 +63,7 @@ class App extends Component {
   componentDidMount() {
     fetch('/users')
       .then(res => res.json())
-      .then(items => this.setState({ items: items }));
+      .then(items => this.setState({ items: items })).then(()=>this.makeActive(this.state.items[0].nameEng));
   }
   
  makeActive(someItem) { 
@@ -71,7 +72,7 @@ class App extends Component {
   fetchVariants(parent) {
 	  fetch('/users/'+parent, {
                 method: 'POST'
-            }).then(res=>res.json()).then(json=> this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})  );
+            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})} else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
 	  }
 
  
@@ -92,9 +93,9 @@ class App extends Component {
       </thead>
    <tbody>
        {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)} isActive={a.nameEng === this.state.active ? 'active' : null} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)} extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
-         <a target='_blank'  rel="noopener noreferrer" href='http://localhost:3001/download' download='dist.json'>скачать </a>  
         </tbody>
 </table>
+        <a target='_blank'  rel="noopener noreferrer" href='http://localhost:3001/download' download='dist.json'>скачать </a>
       </div>
     );
   }
