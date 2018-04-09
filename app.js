@@ -4,12 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
-var connect = mongoose.connect("mongodb://username:password@ds135830.mlab.com:35830/translations");
+var x = mongoose.connect("mongodb://username:password@ds135830.mlab.com:35830/translations");
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var translationRouter = require('./routes/translate');
 var downloadRouter = require('./routes/download');
- 
+var importRouter = require('./routes/import'); 
+var variantsRouter = require('./routes/variants'); 
 var app = express();
 
 
@@ -20,12 +21,13 @@ app.use(express.urlencoded({
     extended: false
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'public'))); 
 app.use('/', indexRouter);
 app.use('/download', downloadRouter);
 app.use('/users', usersRouter);
 app.use('/translation', translationRouter);
+app.use('/import', importRouter);
+app.use('/variants', variantsRouter);
 
 
 app.use(function(req, res, next) {

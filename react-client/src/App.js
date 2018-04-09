@@ -1,12 +1,102 @@
 import React, {
     Component
 }
-from 'react';
-import ReactDOM from 'react-dom';
+from 'react'; 
 
 
 import './App.css';
  
+class Json extends React.Component {
+ constructor(props) {
+            super(props);
+            this.state = {
+               importJson:'Импортировать JSON',isCorrectJson: 'default',json: ''
+            };
+         this.handleSetState = this.handleSetState.bind(this); 
+		}
+     
+     
+     importFile() { 
+		 console.log(typeof this.state.json);
+		 fetch('/import',
+{
+    method: "POST",
+    body: this.state.json,
+    headers: { 'content-type': 'application/json'}
+})
+		 }
+		 
+     handleSetState(action,fileName,JSON) {
+	 	 let setState = (e) => this.setState(e);
+		 switch (action) {
+			 case 'ready': 
+         setState({importJson:   fileName +"\u2713" ,isCorrectJson: 'ready',json: JSON });
+         break;
+			 case 'error':  
+         setState({importJson:   fileName +"\u2716" ,isCorrectJson: 'error',json: '' });
+         break;
+         default: 
+		 setState({importJson: 'Импортировать JSON',isCorrectJson: 'default',json: ''}); 
+         break;
+			 }
+		 }
+     
+            importJson(event) {  
+	 let handleSetState = this.handleSetState;
+	 if (event.target.files.length < 1) {
+		handleSetState();
+		 return;
+		 }  
+		 
+	 let fileName = event.target.files[0].name.replace('.json','');
+	 
+	 
+	 
+	  
+	  const   validateJson = (string) =>  {
+    try {
+        JSON.parse(string);
+    } catch (e) { 
+        return false;
+    } 
+    return true;
+}
+
+
+	 var reader = new FileReader();
+	 reader.onload =(function(theFile) { 
+        return function(e) {   
+			if (validateJson(e.target.result)){ 
+				handleSetState('ready',fileName,e.target.result);
+	  } else { 
+		  handleSetState('error',fileName); 
+		  }
+        };
+      })(event.target.files[0]);
+      
+       reader.readAsText(event.target.files[0]);
+       
+	 }
+	 
+	 
+	 
+             render() { 
+				 
+     return       <div id="JSON"> <label id='importJsonId'  className={this.state.isCorrectJson} htmlFor="importJson">
+     {this.state.importJson}
+        <input type='file' onChange={this.importJson.bind(this)} accept='.json' id="importJson" />
+        </label> 
+        <label id='submitJsonId'  className={this.state.isCorrectJson === 'ready' ? 'submitActive' : 'submitUnactive' } htmlFor="submitJson" onClick={this.state.json ? this.importFile.bind(this) : null}> 
+        Submit
+           </label> 
+        <input type='submit' id="submitJson" />
+        </div>
+		} //render
+	}
+
+
+
+
 
 
 class Row extends React.Component {
@@ -30,14 +120,13 @@ class Row extends React.Component {
             }).then(() => this.props.makeActive(this.props.item)) 
         } 
         submitVariant = () => {
-			 fetch('/translation/' + this.props.item + '/' + this.props.extraVariant, {
+			 fetch('/translation/' + this.props.active + '/' + this.props.extraVariant, {
                 method: 'POST'
-            }).then(()=> this.props.updateVariants(this.props.item))
+            }).then(()=> this.props.updateVariants(this.props.active))
 			}
-        render() {
-			 var makeActive = this.props.makeActive;
-                return <tr className={this.props.isActive}>
-                    < td   onClick={() => makeActive(this.props.item)} > {
+        render() { 
+                return <tr className={this.props.active === this.props.item ? 'active' : null}>
+                    < td   onClick={() => this.props.makeActive(this.props.item)} > {
                         this.props.item
                     } < /td>
     <td><input type='text'  onChange={this.change} value={this.state.ru}  /> < /td>
@@ -56,25 +145,34 @@ class App extends Component {
 	
 	constructor(props) {
             super(props); 
-             this.state = {items: [], active : '',variants: [],counts:[]};   
+             this.state = {items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10};   
+           this.setListLength = this.setListLength.bind(this);
         } 
  
 
   componentDidMount() {
-    fetch('/users')
-      .then(res => res.json())
-      .then(items => this.setState({ items: items })).then(()=>this.makeActive(this.state.items[0].nameEng));
+   this.fetchList();
   }
   
  makeActive(someItem) { 
     this.setState({ active: someItem },()=>this.fetchVariants(this.state.active));   
   }
   fetchVariants(parent) {
-	  fetch('/users/'+parent, {
+	  fetch('/variants/'+parent, {
                 method: 'POST'
-            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})} else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
+            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
 	  }
 
+fetchList() {
+	 fetch('/users/'+this.state.listLength)
+      .then(res => res.json())
+      .then((items) => {this.setState({ items: items }); return items}).then(x=>this.makeActive(x[0].nameEng));
+	}
+
+setListLength (event) {
+	localStorage.setItem("listLength",event.target.value);
+	this.setState({listLength: localStorage.getItem("listLength")},() => this.fetchList()); 
+	}
  
  
  
@@ -89,13 +187,24 @@ class App extends Component {
     <th>Русский</th> 
     <th>Опции</th> 
     {this.state.active ? <th>Варианты перевода</th> : null}
+     <th id="settings"> <div id="settingsIcon">⚙</div> </th> 
   </tr>
       </thead>
    <tbody>
-       {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)} isActive={a.nameEng === this.state.active ? 'active' : null} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)} extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
+       {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)}  active={this.state.active} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)}  extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
+        
         </tbody>
-</table>
-        <a target='_blank'  rel="noopener noreferrer" href='http://localhost:3001/download' download='dist.json'>скачать </a>
+</table> 
+<Json/>
+<br/>
+<a target="_blank" rel="noopener noreferrer" href="http://localhost:3001/download" download="dist.json">скачать </a>
+<br/>
+<select onChange={this.setListLength} value={this.state.listLength}> 
+  <option value="10">10</option>
+  <option value="25">25</option>
+  <option value="50">50</option>
+  <option value="1969">1969</option>
+</select>
       </div>
     );
   }

@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 
-var itemSchema = new mongoose.Schema({
+var invalidScheme = new mongoose.Schema({
     "nameEng": String,
     "translations": [{
         "variant": String,
@@ -11,7 +11,19 @@ var itemSchema = new mongoose.Schema({
 },  
            { collection : "Russian" });
 
-var Item = mongoose.model('Item', itemSchema);
+var old = mongoose.model("Old",invalidScheme);
 
-
-module.exports = Item;
+var validScheme = new mongoose.Schema({
+	"currentTranslation":  String ,
+    "nameEng": String,
+    "translations": [{
+        "variant": String ,
+        "count":   Number
+    }] 
+} );
+           
+ var current =  mongoose.model("Current",validScheme,"Russian");
+ let MongooseScheme = {"current": current, "old": old}
+ 
+ 
+module.exports = MongooseScheme;

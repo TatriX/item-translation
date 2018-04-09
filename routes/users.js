@@ -1,12 +1,12 @@
 var express = require('express');
 var router = express.Router(); 
-var Item = require('./schema')
+var MongooseScheme = require('./schema')
 
 
 
- // Вернуть полный список, если ничего не выбрано 
+ // Вернуть полный список 
 router.get('/', function(req, res, next) {  
-    Item.find({}, function(err, found) {
+    MongooseScheme.current.find({}, function(err, found) {
         if (err) {
             return console.error(err)
         };
@@ -17,17 +17,15 @@ router.get('/', function(req, res, next) {
  
 });
  /////
+ //// Вернуть N элементов
+router.get('/:count', function(req, res, next) {  
+    MongooseScheme.current.find({}).limit(Number(req.params.count)).exec(function(err,found) {
+	 
+		res.send(found)
+		});  
+ 
 
-//////Вернуть варианты перевода 
-router.post('/:specifiedItem',function(req,res,next){
-	 Item.find({"nameEng": req.params.specifiedItem  
-                    }  , function(err, found) {
-                        if (err) return res.send(500, {
-                            error: err
-                        });
-                        const requestedVariants = found[0].translations; 
-                        return res.send(requestedVariants);
-                    });
+ 
 });
 
 module.exports = router;
