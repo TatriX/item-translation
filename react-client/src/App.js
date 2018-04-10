@@ -18,7 +18,7 @@ class Json extends React.Component {
      
      importFile() { 
 		 console.log(typeof this.state.json);
-		 fetch('/import',
+		 fetch('/import/Russian',
 {
     method: "POST",
     body: this.state.json,

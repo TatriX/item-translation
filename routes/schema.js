@@ -16,10 +16,10 @@ var old = mongoose.model("Old",invalidScheme);
 var validScheme = new mongoose.Schema({
 	"currentTranslation":  String ,
     "nameEng": String,
-    "translations": [{
+    "translations": [new mongoose.Schema({
         "variant": String ,
-        "count":   Number
-    }] 
+        "count":   Number 
+    },  {_id: false })] 
 } );
            
  var current =  mongoose.model("Current",validScheme,"Russian");
