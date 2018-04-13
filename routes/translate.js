@@ -2,11 +2,11 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path'); 
 var router = express.Router(); 
-var MongooseScheme = require('./schema')
+var MONGOOSE = require('./schema')
  
 
 router.post('/:eng/:ru', function(req, res, next) {  
-        MongooseScheme.current.find({}, function(err, found) {
+        MONGOOSE.model.find({}, function(err, found) {
             if (err) {
                 return console.error(err)
             };
@@ -17,7 +17,7 @@ router.post('/:eng/:ru', function(req, res, next) {
              const variant = requiredItem.translations.find(e=>e.variant == req.params.ru); 
              //Добавить несуществующий вариант перевода
                 if (!variant) {
-					 MongooseScheme.current.findOneAndUpdate({
+					 MONGOOSE.model.findOneAndUpdate({
                         "nameEng": req.params.eng
                     }, {
                         $push: {
@@ -36,7 +36,7 @@ router.post('/:eng/:ru', function(req, res, next) {
 					////////////
 					//////  Плюс 1 к существующему варианту
 					else {
-						 MongooseScheme.current.findOneAndUpdate({
+						 MONGOOSE.model.findOneAndUpdate({
                         "nameEng": req.params.eng,
                         "translations.variant": req.params.ru
                     }, {

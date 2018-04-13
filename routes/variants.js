@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router(); 
-var MongooseScheme = require('./schema')
+var MONGOOSE = require('./schema')
 
 
 
@@ -8,7 +8,7 @@ var MongooseScheme = require('./schema')
 
 //////Вернуть варианты перевода 
 router.post('/:specifiedItem',function(req,res,next){
-	 MongooseScheme.current.find({"nameEng": req.params.specifiedItem  
+	 MONGOOSE.model.find({"nameEng": req.params.specifiedItem  
                     }  , function(err, found) {
                         if (err) return res.send(500, {
                             error: err

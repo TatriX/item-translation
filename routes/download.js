@@ -1,11 +1,11 @@
 var express = require('express');
 var router = express.Router(); 
-var MongooseScheme = require('./schema')
+var MONGOOSE = require('./schema')
 
 
  
 router.get('/', function(req, res, next) {  
-    MongooseScheme.current.find({}, function(err, found) {
+    MONGOOSE.model.find({}, function(err, found) {
         if (err) {
             return console.error(err)
         }; 

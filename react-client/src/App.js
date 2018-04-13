@@ -18,7 +18,7 @@ class Json extends React.Component {
      
      importFile() { 
 		 console.log(typeof this.state.json);
-		 fetch('/import/Russian',
+		 fetch('/import/' + this.props.importLanguage,
 {
     method: "POST",
     body: this.state.json,
@@ -145,7 +145,7 @@ class App extends Component {
 	
 	constructor(props) {
             super(props); 
-             this.state = {items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10};   
+             this.state = {importLanguage: "Russian",items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10};   
            this.setListLength = this.setListLength.bind(this);
         } 
  
@@ -173,7 +173,9 @@ setListLength (event) {
 	localStorage.setItem("listLength",event.target.value);
 	this.setState({listLength: localStorage.getItem("listLength")},() => this.fetchList()); 
 	}
- 
+ setImportLanguage (event) {  
+	this.setState({importLanguage: event.target.value}); 
+	}
  
  
   render() { 
@@ -195,7 +197,7 @@ setListLength (event) {
         
         </tbody>
 </table> 
-<Json/>
+<Json importLanguage={this.state.importLanguage}/>
 <br/>
 <a target="_blank" rel="noopener noreferrer" href="http://localhost:3001/download" download="dist.json">скачать </a>
 <br/>
@@ -204,6 +206,14 @@ setListLength (event) {
   <option value="25">25</option>
   <option value="50">50</option>
   <option value="1969">1969</option>
+</select>
+<select onChange={this.setImportLanguage.bind(this)}> 
+  <option value="Russian" selected >Russian</option>
+  <option value="Brazilian-Portuguese">Brazilian Portuguese</option>
+  <option value="Japanese">Japanese</option>
+  <option value="Korean">Korean</option>
+  <option value="Chinese-traditional">Chinese traditional</option>
+  <option value="Chinese-simplified">Chinese simplified</option>
 </select>
       </div>
     );
