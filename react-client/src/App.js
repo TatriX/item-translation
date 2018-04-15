@@ -108,19 +108,19 @@ class Row extends React.Component {
         } 
         change = (e) => {  
             this.setState({
-                ru: e.target.value.replace(/[^А-Яа-я\s]/g,'') 
+                ru: e.target.value 
             }) 
         }
         reset = () => this.setState({
             ru: ''
         })
         submit = () => {
-            fetch('/translation/' + this.props.item + '/' + this.state.ru, {
+            fetch('/translation/' + this.props.item + '/' + this.state.ru + '/' + this.props.tableLang, {
                 method: 'POST'
             }).then(() => this.props.makeActive(this.props.item)) 
         } 
         submitVariant = () => {
-			 fetch('/translation/' + this.props.active + '/' + this.props.extraVariant, {
+			 fetch('/translation/' + this.props.active + '/' + this.props.extraVariant+ '/' + this.props.tableLang, {
                 method: 'POST'
             }).then(()=> this.props.updateVariants(this.props.active))
 			}
@@ -145,7 +145,7 @@ class App extends Component {
 	
 	constructor(props) {
             super(props); 
-             this.state = {importLanguage: "Russian",items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10};   
+             this.state = {importLanguage: "Russian",items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian'};   
            this.setListLength = this.setListLength.bind(this);
         } 
  
@@ -158,13 +158,13 @@ class App extends Component {
     this.setState({ active: someItem },()=>this.fetchVariants(this.state.active));   
   }
   fetchVariants(parent) {
-	  fetch('/variants/'+parent + '/'+ localStorage.getItem("tableLanguage"), {
+	  fetch('/variants/'+parent + '/'+ this.state.tableLang, {
                 method: 'POST'
             }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
 	  }
 
 fetchList() {
-	 fetch('/users/'+this.state.listLength + '/'+ localStorage.getItem("tableLanguage"))
+	 fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang)
       .then(res => res.json())
       .then((items) => {this.setState({ items: items }); return items}).then(x=>this.makeActive(x[0].nameEng));
 	}
@@ -193,7 +193,7 @@ setListLength (event) {
   </tr>
       </thead>
    <tbody>
-       {this.state.items.map((a,index)  => <Row  updateVariants={this.fetchVariants.bind(this)}  active={this.state.active} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)}  extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
+       {this.state.items.map((a,index)  => <Row tableLang={this.state.tableLang} updateVariants={this.fetchVariants.bind(this)}  active={this.state.active} key={index} item={a.nameEng} makeActive={this.makeActive.bind(this)}  extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)} 
         
         </tbody>
 </table> 

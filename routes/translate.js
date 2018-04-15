@@ -2,11 +2,14 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path'); 
 var router = express.Router(); 
-var MONGOOSE = require('./schema')
+var MONGOOSE = require('./schema');
+var mongoose = require('mongoose');
+
  
 
-router.post('/:eng/:ru', function(req, res, next) {  
-        MONGOOSE.model.find({}, function(err, found) {
+router.post('/:eng/:ru/:language', function(req, res, next) {  
+	  let LanguageModel = mongoose.model(req.params.language, MONGOOSE.schema,req.params.language);  
+        LanguageModel.find({}, function(err, found) {
             if (err) {
                 return console.error(err)
             };
@@ -17,7 +20,7 @@ router.post('/:eng/:ru', function(req, res, next) {
              const variant = requiredItem.translations.find(e=>e.variant == req.params.ru); 
              //Добавить несуществующий вариант перевода
                 if (!variant) {
-					 MONGOOSE.model.findOneAndUpdate({
+					 LanguageModel.findOneAndUpdate({
                         "nameEng": req.params.eng
                     }, {
                         $push: {
@@ -36,7 +39,7 @@ router.post('/:eng/:ru', function(req, res, next) {
 					////////////
 					//////  Плюс 1 к существующему варианту
 					else {
-						 MONGOOSE.model.findOneAndUpdate({
+						 LanguageModel.findOneAndUpdate({
                         "nameEng": req.params.eng,
                         "translations.variant": req.params.ru
                     }, {
