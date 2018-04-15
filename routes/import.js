@@ -72,7 +72,7 @@ router.post('/:lang', function(req, res, next) {
 		let inputData = Object.keys(req.body).filter(e=>masterDB.indexOf(e) > 0);
 		let toUpload = [...inputData, ...masterDB.filter(e=>inputData.indexOf(e) < 0)];
 		 toUpload.forEach(function (key,index){ 
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":{_id : false, _v: false}}} ,{upsert:true}).exec();
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": req.body[key]},$addToSet: {"translations":{"variant":req.body[key],"count":1,_id : false, _v: false}}} ,{upsert:true}).exec();
 			 }); 
 		 } 
 	
