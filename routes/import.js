@@ -2,40 +2,96 @@ var express = require('express');
 var router = express.Router(); 
 var MONGOOSE = require('./schema')
 var mongoose = require('mongoose');
-
-
-
-
-
+const languageList = ["Korean","Japanese","Brazilian Portuguese","Chinese traditional","Chinese simplified"];
+ 
+  
+  
 router.post('/:lang', function(req, res, next) {  
-	console.log("import/" + req.params.lang); 
-	function fn(language) { 
-		let Japanese = mongoose.model('Japanese', MONGOOSE.schema, 'Japanese') ;  
-	 
-	  MONGOOSE.model.find({},function(err,found) {  
-		  let nameEng = found.map(e=>e.nameEng);
-		  let object = req.body;
-		    Object.keys(req.body).filter(e=>nameEng.indexOf(e) < 0).forEach(e=>delete object[e]) ;
-		   object = Object.keys(object); 
-		 nameEng.filter(e=>object.indexOf(e) < 0).map(function (key,index){
-			 Japanese.update({},{nameEng:key},{upsert:true});
-			 })
-		  });
-		}
+	const requestedLanguage = req.params.lang;  
 	
-	/**
- switch (req.params.lang) {
-    case "Russian":  
-   Object.keys(req.body).map(function(key, index) {
-  MongooseScheme.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key]}, $addToSet: {"translations":{"variant":req.body[key],"count":1, _id : false, _v: false}}} , { upsert : true },e=>console.log(e)); 
-});
-   break;
-   case "Japanese":
+	
+	
    
-   break; 
-    }
-**/
-    fn();
+	function fn(language) { 
+	  let masterDB;   
+	  console.log('fn');
+	 let init = () => {
+	  console.log('init');
+		 
+		  mongoose.connect("mongodb://username:password@ds135830.mlab.com:35830/translations", function(err, client) {
+    if(err) {
+        console.log(err)
+    }  
+	  console.log('connect');
+		   client.db.listCollections().toArray(function(err, collections) {
+      const showDBs = collections.filter(e=>languageList.indexOf(e.name) > -1).map(e=>e.name) ;
+      
+	  console.log(showDBs);
+    
+	  MONGOOSE.model.find({},function(err,found) {   
+		  masterDB = found.map(e=>e.nameEng); 
+		  if (language !== "Sync") { 
+			showDBs.indexOf(language) === -1 ?  uploadDB(language) : unifyDB(language);
+	  } 
+	  else {
+		  languageList.forEach(e=>unifyDB(e));
+		  } 
+		  
+		  
+		  });
+		  
+		  
+    });
+}); 
+	  } 
+	    
+	  let unifyDB = (language) => {
+		  let LanguageModel = mongoose.model(language, MONGOOSE.schema,language);
+		  LanguageModel.find({},function(err,found) {  
+			  if(err) {  console.log(err)}
+			  let toRemove = Object.keys(found).filter(e=>masterDB.indexOf(e) < 0);
+			  if (toRemove.length > 1) { 
+				  toRemove.forEach(function(e) {LanguageModel.remove({"nameEng":e})});
+				  }
+				  
+				  
+			   masterDB.filter(e=>found.indexOf(e) < 0).forEach(function (key,index){ 
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":{_id : false, _v: false}}} ,{upsert:true}).exec();
+			 }); 
+			  
+			  
+			  });
+			  
+			  
+		  }
+		  
+		  
+	 let uploadDB = (language) => {
+		 console.log('upload');
+		let LanguageModel = mongoose.model(language, MONGOOSE.schema,language) ; 
+		let inputData = Object.keys(req.body).filter(e=>masterDB.indexOf(e) > 0);
+		let toUpload = [...inputData, ...masterDB.filter(e=>inputData.indexOf(e) < 0)];
+		 toUpload.forEach(function (key,index){ 
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":{_id : false, _v: false}}} ,{upsert:true}).exec();
+			 }); 
+		 } 
+	
+	
+	
+	
+	init();
+	
+		}
+		
+		
+		  
+	
+	 if(requestedLanguage === "Russian"){ 
+   Object.keys(req.body).map(function(key, index) { 
+  MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key]}, $addToSet: {"translations":{"variant":req.body[key],"count":1, _id : false, _v: false}}} , { upsert : true },e=>console.log(e)); 
+});
+}  else if (requestedLanguage === "Sync" || languageList.indexOf(requestedLanguage) > -1) {fn(requestedLanguage)} 
+ 
 });
 
 

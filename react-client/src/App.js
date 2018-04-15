@@ -90,6 +90,7 @@ class Json extends React.Component {
         Submit
            </label> 
         <input type='submit' id="submitJson" />
+        
         </div>
 		} //render
 	}
@@ -207,14 +208,15 @@ setListLength (event) {
   <option value="50">50</option>
   <option value="1969">1969</option>
 </select>
-<select onChange={this.setImportLanguage.bind(this)}> 
-  <option value="Russian" selected >Russian</option>
-  <option value="Brazilian-Portuguese">Brazilian Portuguese</option>
+<select onChange={this.setImportLanguage.bind(this)} value={this.state.importLanguage}>  
+  <option value="Russian" >Russian</option>
+  <option value="Brazilian Portuguese">Brazilian Portuguese</option>
   <option value="Japanese">Japanese</option>
   <option value="Korean">Korean</option>
-  <option value="Chinese-traditional">Chinese traditional</option>
-  <option value="Chinese-simplified">Chinese simplified</option>
+  <option value="Chinese traditional">Chinese traditional</option>
+  <option value="Chinese simplified">Chinese simplified</option>
 </select>
+<button onClick={() => fetch('/import/Sync',{  method: "POST",  headers: { 'content-type': 'application/json'}})}>Sync</button>
       </div>
     );
   }
