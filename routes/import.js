@@ -57,7 +57,7 @@ router.post('/:lang', function(req, res, next) {
 				  
 				  
 			   masterDB.filter(e=>found.indexOf(e) < 0).forEach(function (key,index){ 
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":{_id : false, _v: false}}} ,{upsert:true}).exec();
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":[]}} ,{upsert:true}).exec();
 			 }); 
 			  
 			  
