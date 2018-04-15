@@ -48,10 +48,11 @@ router.post('/:lang', function(req, res, next) {
 	  let unifyDB = (language) => {
 		  let LanguageModel = mongoose.model(language, MONGOOSE.schema,language);
 		  LanguageModel.find({},function(err,found) {  
-			  if(err) {  console.log(err)}
-			  let toRemove = Object.keys(found).filter(e=>masterDB.indexOf(e) < 0); 
+			  if(err) {  console.log(err)} 
+			  let toRemove = found.map(e=>e.nameEng).filter(e=>masterDB.indexOf(e) < 0); 
+			  console.log(toRemove);
 			  if (toRemove.length > 0) { 
-				  toRemove.forEach(function(e) {LanguageModel.remove({"nameEng":e})});
+				  toRemove.forEach(function(e) { LanguageModel.remove({"nameEng":e}).exec()});
 				  }
 				  
 				  
