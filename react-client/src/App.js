@@ -3,7 +3,6 @@ import React, {
 }
 from 'react'; 
 
-
 import './App.css';
  
 class Json extends React.Component {
@@ -159,13 +158,13 @@ class App extends Component {
     this.setState({ active: someItem },()=>this.fetchVariants(this.state.active));   
   }
   fetchVariants(parent) {
-	  fetch('/variants/'+parent, {
+	  fetch('/variants/'+parent + '/'+ localStorage.getItem("tableLanguage"), {
                 method: 'POST'
             }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
 	  }
 
 fetchList() {
-	 fetch('/users/'+this.state.listLength)
+	 fetch('/users/'+this.state.listLength + '/'+ localStorage.getItem("tableLanguage"))
       .then(res => res.json())
       .then((items) => {this.setState({ items: items }); return items}).then(x=>this.makeActive(x[0].nameEng));
 	}

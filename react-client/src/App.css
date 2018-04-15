@@ -73,8 +73,22 @@ padding: 0 !important;
     font-size: 30px; 
 background-color: white !important;
 }
+#previewList li { 
+margin: 30px;
+  display: inline;
+}
+a:visited{
+  color:black;
+}
+a {
 
-
+text-decoration: none;
+}
+#previewList { 
+font-size: 22px;
+display: table;
+margin: 130px auto;
+}
  
 #header, td  { 
 	    text-align: center;

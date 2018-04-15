@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router(); 
-var MONGOOSE = require('./schema')
+var MONGOOSE = require('./schema');
+var mongoose = require('mongoose');
 
 
 
@@ -18,10 +19,10 @@ router.get('/', function(req, res, next) {
 });
  /////
  //// Вернуть N элементов
-router.get('/:count', function(req, res, next) {  
-    MONGOOSE.model.find({}).limit(Number(req.params.count)).exec(function(err,found) {
-	 
-		res.send(found)
+router.get('/:count/:language', function(req, res, next) { 
+	  let LanguageModel = mongoose.model(req.params.language, MONGOOSE.schema,req.params.language);  
+    LanguageModel.find({}).limit(Number(req.params.count)).exec(function(err,found) {   
+		res.send(found);
 		});  
  
 
