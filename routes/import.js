@@ -6,7 +6,7 @@ const languageList = ["Korean","Japanese","Brazilian Portuguese","Chinese tradit
  
   
   
-router.post('/:lang', function(req, res, next) {  
+router.post('/:lang', function(req, res, next) {   
 	const requestedLanguage = req.params.lang;  
 	
 	
@@ -49,8 +49,8 @@ router.post('/:lang', function(req, res, next) {
 		  let LanguageModel = mongoose.model(language, MONGOOSE.schema,language);
 		  LanguageModel.find({},function(err,found) {  
 			  if(err) {  console.log(err)}
-			  let toRemove = Object.keys(found).filter(e=>masterDB.indexOf(e) < 0);
-			  if (toRemove.length > 1) { 
+			  let toRemove = Object.keys(found).filter(e=>masterDB.indexOf(e) < 0); 
+			  if (toRemove.length > 0) { 
 				  toRemove.forEach(function(e) {LanguageModel.remove({"nameEng":e})});
 				  }
 				  
@@ -86,10 +86,22 @@ router.post('/:lang', function(req, res, next) {
 		
 		  
 	
-	 if(requestedLanguage === "Russian"){ 
-   Object.keys(req.body).map(function(key, index) { 
-  MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key]}, $addToSet: {"translations":{"variant":req.body[key],"count":1, _id : false, _v: false}}} , { upsert : true },e=>console.log(e)); 
+	 if(requestedLanguage === "Russian"){
+		 
+		  MONGOOSE.model.find({},function(err,found){ 
+			  let ArrayFound = found.map(e=>e.nameEng); 
+			  let reqBody= Object.keys(req.body);
+		  let toRemove = ArrayFound.filter(e=>reqBody.indexOf(e) < 0);
+			  if (toRemove.length > 0) { 
+				  toRemove.forEach(function(e) {  MONGOOSE.model.remove({"nameEng":e}).exec()});
+				  }
+				  console.log(toRemove);
+   reqBody.map(function(key, index) { 
+  MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key]}, $addToSet: {"translations":{"variant":req.body[key],"count":1, _id : false, _v: false}}} , { upsert : true }).exec(); 
 });
+}
+)
+
 }  else if (requestedLanguage === "Sync" || languageList.indexOf(requestedLanguage) > -1) {fn(requestedLanguage)} 
  
 });
