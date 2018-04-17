@@ -30,11 +30,11 @@ router.post('/:lang', function(req, res, next) {
     
 	  MONGOOSE.model.find({},function(err,found) {   
 		  masterDB = found.map(e=>e.nameEng); 
-		  if (language !== "Sync") { 
-			showDBs.indexOf(language) === -1 ?  uploadDB(language) : unifyDB(language);
+		  if (language === "Sync") { 
+		  languageList.forEach(e=>unifyDB(e));
 	  } 
 	  else {
-		  languageList.forEach(e=>unifyDB(e));
+			uploadDB(language) 
 		  } 
 		  
 		  
@@ -54,10 +54,10 @@ router.post('/:lang', function(req, res, next) {
 			  if (toRemove.length > 0) { 
 				  toRemove.forEach(function(e) { LanguageModel.remove({"nameEng":e}).exec()});
 				  }
-				  
-				  
-			   masterDB.filter(e=>found.indexOf(e) < 0).forEach(function (key,index){ 
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key},$addToSet: {"translations":[]}} ,{upsert:true}).exec();
+				  const foundArray = found.map(e=>e.nameEng);
+			   masterDB.filter(e=>foundArray.indexOf(e) < 0).forEach(function (key,index){  
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,currentTranslation:"","translations":[]}} ,{upsert:true}).exec();
+		 
 			 }); 
 			  
 			  
@@ -72,8 +72,12 @@ router.post('/:lang', function(req, res, next) {
 		let LanguageModel = mongoose.model(language, MONGOOSE.schema,language) ; 
 		let inputData = Object.keys(req.body).filter(e=>masterDB.indexOf(e) > 0);
 		let toUpload = [...inputData, ...masterDB.filter(e=>inputData.indexOf(e) < 0)];
-		 toUpload.forEach(function (key,index){ 
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": req.body[key]},$addToSet: {"translations":{"variant":req.body[key],"count":1,_id : false, _v: false}}} ,{upsert:true}).exec();
+		 toUpload.forEach(function (key,index){  
+			 if (req.body[key]) {
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": req.body[key]} , $addToSet: {"translations":{"variant":req.body[key],"count":1,_id : false, _v: false}}} ,{upsert:true}).exec();
+		 } else {
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": ""}} ,{upsert:true}).exec();
+		 }
 			 }); 
 		 } 
 	

@@ -2,8 +2,42 @@ import React, {
     Component
 }
 from 'react'; 
-
+ 
 import './App.css';
+ 
+ class Settings extends React.Component {
+  
+		
+		render() {
+			return (
+
+	<div id="settingsContainer">
+
+<select onChange={this.props.setListLength} value={this.props.listLengthValue}> 
+  <option value="10">10</option>
+  <option value="25">25</option>
+  <option value="50">50</option>
+  <option value="1969">1969</option>
+</select>
+<select onChange={this.props.setImportLanguage} value={this.props.importLanguageValue}>  
+  <option value="Russian" >Russian</option>
+  <option value="Brazilian Portuguese">Brazilian Portuguese</option>
+  <option value="Japanese">Japanese</option>
+  <option value="Korean">Korean</option>
+  <option value="Chinese traditional">Chinese traditional</option>
+  <option value="Chinese simplified">Chinese simplified</option>
+</select>
+<Json importLanguage={this.props.importLanguage}/>
+<br/>
+<a target="_blank" rel="noopener noreferrer" href={"http://localhost:3001/download/"+this.props.langValue} download="dist.json">скачать </a>
+<br/>
+<button onClick={() => fetch('/import/Sync',{  method: "POST",  headers: { 'content-type': 'application/json'}})}>Sync</button>
+</div>
+			)
+			}
+	 
+	 }
+ 
  
 class Json extends React.Component {
  constructor(props) {
@@ -115,7 +149,7 @@ class Row extends React.Component {
             ru: ''
         })
         submit = () => {
-            fetch('/translation/' + this.props.item + '/' + this.state.ru + '/' + this.props.tableLang, {
+            fetch('/translation/' + this.props.item + '/' + this.state.ru.trim() + '/' + this.props.tableLang, {
                 method: 'POST'
             }).then(() => this.props.makeActive(this.props.item)) 
         } 
@@ -145,8 +179,10 @@ class App extends Component {
 	
 	constructor(props) {
             super(props); 
-             this.state = {importLanguage: "Russian",items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian'};   
-           this.setListLength = this.setListLength.bind(this);
+             this.state =  {multilangHeaders : {"Russian": {"translationVariants":"Варианты перевода","noVariants":"Не переведено"},"Brazilian Portuguese": {"translationVariants":"Opções de tradução","noVariants":"Não traduzido"},"Chinese traditional":{"translationVariants":"翻譯選項","noVariants":"未翻譯"},"Chinese simplified":{"translationVariants":"翻译选项","noVariants":"未翻译"},"Japanese":{"translationVariants":"翻訳オプション","noVariants":"翻訳されていない"},"Korean":{"translationVariants":"번역 옵션","noVariants":"번역되지 않음"}}, importLanguage: "Russian",items: [], active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian', noTranslationOnly: true};   
+        
+        
+ 
         } 
  
 
@@ -160,35 +196,35 @@ class App extends Component {
   fetchVariants(parent) {
 	  fetch('/variants/'+parent + '/'+ this.state.tableLang, {
                 method: 'POST'
-            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:["Не переведено"],counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
+            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:this.state.multilangHeaders[localStorage.getItem("tableLanguage")].noVariants,counts:[]},()=>console.log(json))}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)},()=>console.log("x",json))} } );
 	  }
 
 fetchList() {
-	 fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang)
+	 fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang + '/' + this.state.noTranslationOnly)
       .then(res => res.json())
       .then((items) => {this.setState({ items: items }); return items}).then(x=>this.makeActive(x[0].nameEng));
 	}
 
 setListLength (event) {
 	localStorage.setItem("listLength",event.target.value);
-	this.setState({listLength: localStorage.getItem("listLength")},() => this.fetchList()); 
+	this.setState({listLength: localStorage.getItem("listLength")},() => {this.fetchList();}); 
 	}
- setImportLanguage (event) {  
+ setImportLanguage (event) {
 	this.setState({importLanguage: event.target.value}); 
 	}
  
  
-  render() { 
+  render() {  
     return (
       <div>
         <h1 id='header'>Зо головок</h1>
         <table id="entireTable">
           <thead>
          <tr>
-    <th>Украинский</th>
-    <th>Русский</th> 
-    <th>Опции</th> 
-    {this.state.active ? <th>Варианты перевода</th> : null}
+    <th> </th>
+    <th> </th> 
+    <th> </th> 
+    {this.state.active ? <th>{this.state.multilangHeaders[localStorage.getItem("tableLanguage")].translationVariants}</th> : null}
      <th id="settings"> <div id="settingsIcon">⚙</div> </th> 
   </tr>
       </thead>
@@ -197,25 +233,11 @@ setListLength (event) {
         
         </tbody>
 </table> 
-<Json importLanguage={this.state.importLanguage}/>
-<br/>
-<a target="_blank" rel="noopener noreferrer" href="http://localhost:3001/download" download="dist.json">скачать </a>
-<br/>
-<select onChange={this.setListLength} value={this.state.listLength}> 
-  <option value="10">10</option>
-  <option value="25">25</option>
-  <option value="50">50</option>
-  <option value="1969">1969</option>
-</select>
-<select onChange={this.setImportLanguage.bind(this)} value={this.state.importLanguage}>  
-  <option value="Russian" >Russian</option>
-  <option value="Brazilian Portuguese">Brazilian Portuguese</option>
-  <option value="Japanese">Japanese</option>
-  <option value="Korean">Korean</option>
-  <option value="Chinese traditional">Chinese traditional</option>
-  <option value="Chinese simplified">Chinese simplified</option>
-</select>
-<button onClick={() => fetch('/import/Sync',{  method: "POST",  headers: { 'content-type': 'application/json'}})}>Sync</button>
+
+
+	   <Settings importLanguage={this.state.importLanguage} setListLength={this.setListLength.bind(this)} setImportLanguage={this.setImportLanguage.bind(this)} listLengthValue={this.state.listLength} langValue={this.state.importLanguage} /> 
+  
+  
       </div>
     );
   }

@@ -19,12 +19,17 @@ router.get('/', function(req, res, next) {
 });
  /////
  //// Вернуть N элементов
-router.get('/:count/:language', function(req, res, next) { 
+router.get('/:count/:language/:untranslated', function(req, res, next) { 
 	  let LanguageModel = mongoose.model(req.params.language, MONGOOSE.schema,req.params.language);  
-    LanguageModel.find({}).limit(Number(req.params.count)).exec(function(err,found) {   
+	  if (req.params.untranslated === "false"){
+    LanguageModel.find({}).limit(Number(req.params.count)).sort({currentTranslation: 1}).exec(function(err,found) {   
 		res.send(found);
 		});  
- 
+ } else { 
+    LanguageModel.find({"currentTranslation":""}).limit(Number(req.params.count)).sort({currentTranslation: 1}).exec(function(err,found) {   
+		res.send(found);
+		});  
+	 }
 
  
 });

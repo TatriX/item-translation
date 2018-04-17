@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router(); 
-var MONGOOSE = require('./schema')
-
+var MONGOOSE = require('./schema');
+const mongoose = require('mongoose');
 
  
-router.get('/', function(req, res, next) {  
-    MONGOOSE.model.find({}, function(err, found) {
+router.get('/:lang', function(req, res, next) {  
+	let langModel = mongoose.model(req.params.lang,MONGOOSE.schema,req.params.lang);
+    langModel.find({}, function(err, found) {
         if (err) {
             return console.error(err)
         }; 

@@ -2,6 +2,10 @@
 position: absolute;
 }
 
+#settingsContainer {
+display: table;
+margin: 0 auto;
+}
 
 #displayNone {
 display: none !important;
@@ -105,7 +109,7 @@ max-width: 1500px;
 }
 
 #entireTable td, #entireTable th { 
-    border: 1px solid #ddd;
+    border: 0px solid #ddd;
     padding: 8px;
 }
 
@@ -114,13 +118,12 @@ max-width: 1500px;
 #entireTable  td:nth-child(1):hover
 {background-color: #ddd;}
 
-#entireTable th {  
+#entireTable th {   
     padding-top: 12px;
     padding-bottom: 12px; 
     background-color: #4CAF50;
     color: white;
-} 
-
+}  
 #resetButton,#submitButton, .plusOne {
 border-radius: 3px; 
     border: none;
