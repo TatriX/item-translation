@@ -56,7 +56,7 @@ router.post('/:lang', function(req, res, next) {
 				  }
 				  const foundArray = found.map(e=>e.nameEng);
 			   masterDB.filter(e=>foundArray.indexOf(e) < 0).forEach(function (key,index){  
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,currentTranslation:"","translations":[]}} ,{upsert:true}).exec();
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,currentTranslation:""}} ,{upsert:true}).exec();
 		 
 			 }); 
 			  
@@ -74,7 +74,7 @@ router.post('/:lang', function(req, res, next) {
 		let toUpload = [...inputData, ...masterDB.filter(e=>inputData.indexOf(e) < 0)];
 		 toUpload.forEach(function (key,index){  
 			 if (req.body[key]) {
-			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": req.body[key]} , $addToSet: {"translations":{"variant":req.body[key],"count":1,_id : false, _v: false}}} ,{upsert:true}).exec();
+			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": req.body[key].trim()} , $addToSet: {"translations":{"variant":req.body[key].trim(),"count":1,_id : false, _v: false}}} ,{upsert:true}).exec();
 		 } else {
 			 LanguageModel.update({nameEng:key},{"$set":{nameEng:key,"currentTranslation": ""}} ,{upsert:true}).exec();
 		 }
@@ -102,7 +102,11 @@ router.post('/:lang', function(req, res, next) {
 				  }
 				  console.log(toRemove);
    reqBody.map(function(key, index) { 
-  MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key]}, $addToSet: {"translations":{"variant":req.body[key],"count":1, _id : false, _v: false}}} , { upsert : true }).exec(); 
+	   if (req.body[key] && req.body[key].trim().length > 0){
+  MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key].trim()}, $addToSet: {"translations":{"variant":req.body[key].trim(),"count":1, _id : false, _v: false}}} , { upsert : true }).exec(); 
+} else {
+	MONGOOSE.model.update({"nameEng":key}, {$set : {"name":key,"currentTranslation": req.body[key].trim()} } , { upsert : true }).exec(); 
+	}
 });
 }
 )

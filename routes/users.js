@@ -19,16 +19,35 @@ router.get('/', function(req, res, next) {
 });
  /////
  //// Вернуть N элементов
-router.get('/:count/:language/:untranslated', function(req, res, next) { 
+router.get('/:count/:language/:translated/:query', function(req, res, next) { 
 	  let LanguageModel = mongoose.model(req.params.language, MONGOOSE.schema,req.params.language);  
-	  if (req.params.untranslated === "false"){
-    LanguageModel.find({}).limit(Number(req.params.count)).sort({currentTranslation: 1}).exec(function(err,found) {   
-		res.send(found);
-		});  
+	  if (req.params.translated === "false"){
+		  if (req.params.query === "SUKABLYA") {
+    LanguageModel.find({}).sort({currentTranslation: 1}).limit(Number(req.params.count)).exec(function(err,found) {   
+			if (found) {
+		res.send(found); 
+	} else {res.send('[]')}
+		});  } else {
+		LanguageModel.find({"nameEng":{$regex: req.params.query, $options: 'i'}}).sort({currentTranslation: 1}).limit(Number(req.params.count)).exec(function(err,found) {   
+		if (found) {
+		res.send(found); 
+	} else {res.send('[]')}
+		});	
+			}
  } else { 
-    LanguageModel.find({"currentTranslation":""}).limit(Number(req.params.count)).sort({currentTranslation: 1}).exec(function(err,found) {   
-		res.send(found);
-		});  
+	   if (req.params.query === "SUKABLYA") {
+    LanguageModel.find({"currentTranslation":""}).limit(Number(req.params.count)).exec(function(err,found) {   
+		if (found) {
+		res.send(found); 
+	} else {res.send('[]')}
+		});  }
+		else {
+    LanguageModel.find({"nameEng":{$regex: req.params.query, $options: 'i'},"currentTranslation":""}).limit(Number(req.params.count)).exec(function(err,found) {   
+		if (found) {
+		res.send(found); 
+	} else {res.send('[]')}
+		}); 
+			}
 	 }
 
  

@@ -9,8 +9,10 @@ var validSchema = new mongoose.Schema({
         "count":   Number 
     },  {_id: false })] 
 } );
-           
+         
+         
+     
  var currentModel =  mongoose.model("Current",validSchema,"Russian"); 
- let MONGOOSE = {model: currentModel, schema: validSchema}
+ let MONGOOSE = {model: currentModel, schema: validSchema }
  
 module.exports = MONGOOSE;
