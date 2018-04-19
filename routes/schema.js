@@ -10,9 +10,24 @@ var validSchema = new mongoose.Schema({
     },  {_id: false })] 
 } );
          
-         
+var UserSchema = new mongoose.Schema({
+	login: {
+        type: String,
+        required: true
+      },
+      password: {
+        type: String,
+        required: true
+      },
+      cookie: String,
+      translations: [new mongoose.Schema({
+		nameEng: String,
+		variants: [] 
+		  })] 
+	});  
      
  var currentModel =  mongoose.model("Current",validSchema,"Russian"); 
- let MONGOOSE = {model: currentModel, schema: validSchema }
+ var User = mongoose.model("User",UserSchema,"Users");
+ let MONGOOSE = {model: currentModel, schema: validSchema, user: User}
  
 module.exports = MONGOOSE;

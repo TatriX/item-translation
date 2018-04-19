@@ -230,8 +230,55 @@ position: fixed;
 {
     background-color: #ccc;
 }
-
-
-
-
+ 
+ 
+ 
   
+#authContainer {
+margin-top: 50px;   
+display: grid; 
+grid-template-columns: repeat(6,1fr); 
+ grid-template-areas: 
+ ". . header1 header2 . ."
+ ". . footer  footer .  ."
+}
+
+.regauth {  
+min-width: 150px  ;
+background-color: grey;
+color: black;
+line-height: 25px;  
+text-align: center;  
+}
+
+#reg{ 
+grid-area: header1;
+}
+#auth  { 
+grid-area: header2;
+}
+ .activeHeader {
+ color: white !important;
+ background-color:  rgb(44, 62, 80) !important;
+ } 
+#form {   
+ background-color: rgb(44, 62, 80); 
+ 
+ color: white;
+grid-area: footer;
+}
+ #centredForm {  
+ height: 250px;
+ display: table;
+ margin: 0 auto;
+ }
+ 
+ #login { 
+ margin-top: 25px !important;
+ display: table;
+ margin: 0 auto;
+ }
+#moveForm { 
+margin-top:  50px;
+}
+.regauth:hover{background: darkgrey; cursor:pointer;}

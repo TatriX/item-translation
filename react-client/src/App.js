@@ -48,7 +48,8 @@ class Json extends React.Component {
 {
     method: "POST",
     body: this.state.json,
-    headers: { 'content-type': 'application/json'}
+    headers: { 'content-type': 'application/json'},
+                  credentials: 'include'  
 })
 		 }
 		 
@@ -143,12 +144,14 @@ class Row extends React.Component {
         })
         submit = () => {
             fetch('/translation/' + this.props.item + '/' + this.state.ru.trim() + '/' + this.props.tableLang, {
-                method: 'POST'
+                method: 'POST',
+                  credentials: 'include'  
             }).then(() => this.props.makeActive(this.props.item)) 
         } 
         submitVariant = () => {
 			 fetch('/translation/' + this.props.active + '/' + this.props.extraVariant+ '/' + this.props.tableLang, {
-                method: 'POST'
+                method: 'POST',
+                  credentials: 'include'  
             }).then(()=> this.props.updateVariants(this.props.active))
 			}
         render() { 
@@ -196,12 +199,12 @@ class App extends Component {
 	constructor(props) {
             super(props); 
              this.state =  {multilangHeaders :
-				  {"Russian": {"searchPlaceholder": "Поиск по-английски","noTranslationOnly":"Только непереведенные","translationVariants":"Варианты перевода","noVariants":["Не переведено"],"listLengthHeader":"Длина страницы: "},
-				"Brazilian Portuguese": {"searchPlaceholder": "Pesquisar em inglês","noTranslationOnly":"Apenas não traduzido","translationVariants":"Opções de tradução","noVariants":["Não traduzido"],"listLengthHeader":"Сomprimento da página: "},
-				"Chinese traditional":{"searchPlaceholder": "用英文搜索","noTranslationOnly":"只有未翻譯","translationVariants":"翻譯選項","noVariants":["未翻譯"],"listLengthHeader":"頁面長度: "},
-				"Chinese simplified":{"searchPlaceholder": "用英文搜索","noTranslationOnly":"只有未翻译","translationVariants":"翻译选项","noVariants":["未翻译"],"listLengthHeader":"页面长度: "},
-				"Japanese":{"searchPlaceholder": "英語で検索","noTranslationOnly":"翻訳されていない","translationVariants":"翻訳オプション","noVariants":["翻訳されていない"],"listLengthHeader":"ページの長さ: "},
-				"Korean":{"searchPlaceholder": "영어로 검색","noTranslationOnly":"번역되지 않은 경우에만","translationVariants":"번역 옵션","noVariants":["번역되지 않음"],"listLengthHeader":"페이지 길이: "}}, 
+				  {"Russian": {"searchPlaceholder": "Поиск","noTranslationOnly":"Только непереведенные","translationVariants":"Варианты перевода","noVariants":["Не переведено"],"listLengthHeader":"Длина страницы: "},
+				"Brazilian Portuguese": {"searchPlaceholder": "Pesquisar","noTranslationOnly":"Apenas não traduzido","translationVariants":"Opções de tradução","noVariants":["Não traduzido"],"listLengthHeader":"Сomprimento da página: "},
+				"Chinese traditional":{"searchPlaceholder": "搜索","noTranslationOnly":"只有未翻譯","translationVariants":"翻譯選項","noVariants":["未翻譯"],"listLengthHeader":"頁面長度: "},
+				"Chinese simplified":{"searchPlaceholder": "搜索","noTranslationOnly":"只有未翻译","translationVariants":"翻译选项","noVariants":["未翻译"],"listLengthHeader":"页面长度: "},
+				"Japanese":{"searchPlaceholder": "検索","noTranslationOnly":"翻訳されていない","translationVariants":"翻訳オプション","noVariants":["翻訳されていない"],"listLengthHeader":"ページの長さ: "},
+				"Korean":{"searchPlaceholder": "검색","noTranslationOnly":"번역되지 않은 경우에만","translationVariants":"번역 옵션","noVariants":["번역되지 않음"],"listLengthHeader":"페이지 길이: "}}, 
 				importLanguage: "Russian",items: [], search:'', notFound:true, active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian', noTranslationOnly: JSON.parse(localStorage.getItem("noTranslationOnly")) || true};   
         
         
@@ -209,8 +212,12 @@ class App extends Component {
         } 
  
 
-  componentDidMount() {
-   this.fetchList();
+  componentDidMount() { 
+	  fetch('/',{
+		  method: "POST",
+    headers: { 'content-type': 'application/json'},
+		  credentials: 'include', 
+		  }).then(e=>e.json()).then(e=> e.auth != 'failed' ?  this.fetchList() : window.location.href="/regAuth"); 
   }
   
  makeActive(someItem) { 
@@ -218,12 +225,14 @@ class App extends Component {
   }
   fetchVariants(parent) {
 	  fetch('/variants/'+parent + '/'+ this.state.tableLang, {
-                method: 'POST'
+                method: 'POST',
+                  credentials: 'include'  
             }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:this.state.multilangHeaders[localStorage.getItem("tableLanguage")].noVariants,counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
 	  }
 
 fetchList() {
-	 fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang + '/' + this.state.noTranslationOnly+ '/SUKABLYA')
+	 fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang + '/' + this.state.noTranslationOnly+ '/SUKABLYA',
+                  {credentials: 'include'  })
       .then(res => res.json())
       .then((items) => {  if (items.length < 1) { this.setState({notFound: true}); return false} else {this.setState({ items: items, notFound:false }); return items;}}).then(x=> x ? this.makeActive(x[0].nameEng) : null);
 	}
@@ -248,7 +257,8 @@ setListLength (event) {
 			}
  
   search() { 
-	   fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang + '/'  + this.state.noTranslationOnly + '/' + this.state.search)
+	   fetch('/users/'+this.state.listLength + '/'+ this.state.tableLang + '/'  + this.state.noTranslationOnly + '/' + this.state.search,
+                 { credentials: 'include'  })
       .then(res => res.json())
       .then((items) => {  if (items.length < 1) { this.setState({items:[],notFound: true}); return false} else {this.setState({ items: items, notFound:false }); return items;}}).then(x=> x ? this.makeActive(x[0].nameEng) : null);
 	
