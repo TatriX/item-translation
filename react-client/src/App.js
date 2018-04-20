@@ -164,7 +164,7 @@ class Row extends React.Component {
                     < button id='submitButton' onClick = {
                         this.submit
                     } > Submit < /button></td >  
-                    {!this.props.extraVariant ?  null :  !this.props.count ?  <td className="variants">{this.props.extraVariant}</td> :   <td className="variants"> {this.props.extraVariant} <button className="plusOne"   onClick={this.submitVariant}>{this.props.count}</button></td>  } 
+                    {!this.props.extraVariant ?  null :  !this.props.count ?  <td className="variants">{this.props.extraVariant}</td> :   <td className="variants"> {this.props.extraVariant} <button className={this.props.submited ? 'plusOne submited' : 'plusOne'}    onClick={this.submitVariant}>{this.props.count}</button></td>  } 
                      
                     < /tr>
   }
@@ -179,7 +179,8 @@ class DummyRow extends React.Component {
         }  
         submitVariant = () => {
 			 fetch('/translation/' + this.props.active + '/' + this.props.extraVariant+ '/' + this.props.tableLang, {
-                method: 'POST'
+                method: 'POST',
+                  credentials: 'include'  
             }).then(()=> this.props.updateVariants(this.props.active))
 			}
         render() { 
@@ -187,7 +188,7 @@ class DummyRow extends React.Component {
                     < td>  < /td>
     <td>  < /td>
     <td> </td >  
-                    {!this.props.extraVariant ?  null :  !this.props.count ?  <td className="variants">{this.props.extraVariant}</td> :   <td className="variants"> {this.props.extraVariant} <button className="plusOne"   onClick={this.submitVariant}>{this.props.count}</button></td>  } 
+                    {!this.props.extraVariant ?  null :  !this.props.count ?  <td className="variants">{this.props.extraVariant}</td> :   <td className='variants'> {this.props.extraVariant} <button className={this.props.submited ? 'plusOne submited' : 'plusOne'}    onClick={this.submitVariant}>{this.props.count}</button></td>  } 
                      
                     < /tr>
   }
@@ -205,7 +206,7 @@ class App extends Component {
 				"Chinese simplified":{"searchPlaceholder": "搜索","noTranslationOnly":"只有未翻译","translationVariants":"翻译选项","noVariants":["未翻译"],"listLengthHeader":"页面长度: "},
 				"Japanese":{"searchPlaceholder": "検索","noTranslationOnly":"翻訳されていない","translationVariants":"翻訳オプション","noVariants":["翻訳されていない"],"listLengthHeader":"ページの長さ: "},
 				"Korean":{"searchPlaceholder": "검색","noTranslationOnly":"번역되지 않은 경우에만","translationVariants":"번역 옵션","noVariants":["번역되지 않음"],"listLengthHeader":"페이지 길이: "}}, 
-				importLanguage: "Russian",items: [], search:'', notFound:true, active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian', noTranslationOnly: JSON.parse(localStorage.getItem("noTranslationOnly")) || true};   
+				importLanguage: "Russian",items: [], submited:[], search:'', notFound:true, active : '',variants: [],counts:[],listLength : localStorage.getItem("listLength") || 10, tableLang:localStorage.getItem("tableLanguage") || 'Russian', noTranslationOnly: JSON.parse(localStorage.getItem("noTranslationOnly")) || true};   
         
         
  
@@ -227,7 +228,7 @@ class App extends Component {
 	  fetch('/variants/'+parent + '/'+ this.state.tableLang, {
                 method: 'POST',
                   credentials: 'include'  
-            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:this.state.multilangHeaders[localStorage.getItem("tableLanguage")].noVariants,counts:[]})}  else {this.setState({counts: json.map(e=>e.count),variants: json.map(e=>e.variant)})} } );
+            }).then(res=>res.json()).then((json)=> {if (json.length === 0) {this.setState({variants:this.state.multilangHeaders[localStorage.getItem("tableLanguage")].noVariants,counts:[]})}  else {this.setState({counts: json.map(e=>e.count),submited: json.map(e=>e.submited),variants: json.map(e=>e.variant)})} } );
 	  }
 
 fetchList() {
@@ -272,7 +273,7 @@ setListLength (event) {
         <table id="entireTable"> 
           <thead> 
          <tr>
-            <th><input type="text" value={this.state.search} onChange={this.handleSearchInput.bind(this)} placeholder={this.state.multilangHeaders[localStorage.getItem("tableLanguage")].searchPlaceholder} /> <button onClick={this.search.bind(this)}>></button></th> 
+            <th><input type="text" value={this.state.search} onChange={this.handleSearchInput.bind(this)} placeholder={this.state.multilangHeaders[localStorage.getItem("tableLanguage")].searchPlaceholder} /> <button onClick={this.search.bind(this)}> ></button></th> 
     <th>  
  <div id="dropdown">
             <button className="btn">{this.state.multilangHeaders[localStorage.getItem("tableLanguage")].listLengthHeader}{this.state.listLength}</button>
@@ -295,8 +296,8 @@ setListLength (event) {
 		 
 		 this.state.variants.map((a,index)  => 
 		 this.state.items[index]? 
-		 <Row tableLang={this.state.tableLang} updateVariants={this.fetchVariants.bind(this)}  active={this.state.active} key={index} item={this.state.items[index].nameEng} makeActive={this.makeActive.bind(this)}  extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>:
-		 <DummyRow tableLang={this.state.tableLang}  key={a+index}  active={this.state.active} extraVariant={this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)
+		 <Row submited={this.state.submited[index]} tableLang={this.state.tableLang} updateVariants={this.fetchVariants.bind(this)}  active={this.state.active} key={index} item={this.state.items[index].nameEng} makeActive={this.makeActive.bind(this)}  extraVariant={this.state.variants.length <1 ? null :this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>:
+		 <DummyRow updateVariants={this.fetchVariants.bind(this)}  submited={this.state.submited[index]} tableLang={this.state.tableLang}  key={a+index}  active={this.state.active} extraVariant={this.state.variants[index]} count={this.state.counts.length <1? null : this.state.counts[index]}/>)
 		 } 
   
         </tbody>

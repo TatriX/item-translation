@@ -19,6 +19,10 @@ var UserSchema = new mongoose.Schema({
         type: String,
         required: true
       },
+      secret: {
+        type: String,
+        required: true
+      },
       cookie: String,
       translations: [new mongoose.Schema({
 		nameEng: String,

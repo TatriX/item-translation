@@ -29,19 +29,22 @@ class SignUp extends React.Component {
 		constructor(props) {
             super(props);
             this.state = {
-              password: '', login : ''
+              password: '', login : '',secret:'', error: ''
             }; 
 		}
+		handleLogin (e) {  
+			console.log('asdf');
+           cookie.save('auth', e.auth);
+			window.location.href = '/';
+			}
 			handleSearchInput(e){  
-			  e.target.name === "login" ? this.setState({
-            login : e.target.value.replace(/[^A-Za-z0-9]/g,'')
+		  this.setState({
+               [e.target.name] : e.target.value.replace(/[^A-Za-z0-9]/g,'')
             }) 
-            : this.setState({
-            password : e.target.value.replace(/[^A-Za-z0-9]/g,'')
-            }) 
+            
 			}
 	render() {
-		const json = {'login': this.state.login,'password': this.state.password}
+		const json = {'login': this.state.login,'password': this.state.password,'secret':this.state.secret}
 		return (
 		<div>
 	<form>
@@ -50,10 +53,14 @@ class SignUp extends React.Component {
   Password:<br/>
   <input type="text" value={this.state.password}  onChange={this.handleSearchInput.bind(this)} name="password"/>
   <br/>
+  Secret passphrase:  <br/>
+  <input type="text" value={this.state.secret}  onChange={this.handleSearchInput.bind(this)} name="secret" placeholder="For resetting password"/>
+  <br/>
    
 </form>
-<div  id="login">  <button onClick={() =>fetch('/signup', { credentials: 'include',method:'POST',
-    headers: { 'content-type': 'application/json'},body:  JSON.stringify(json)})}id="loginButton">Login</button>  </div>
+<div  id="login">  <button onClick={() =>this.state.login.length < 5 ? this.setState({login:'',error:'Login is too short'}) : this.state.password.length < 5 ? this.setState({password:'',error:'Password is too short'}) : this.state.secret.length < 5 ?  this.setState({secret:'',error:'Secret passphrase is too short'})  : fetch('/signup', { credentials: 'include',method:'POST',
+    headers: { 'content-type': 'application/json'},body:  JSON.stringify(json)}).then(e=>e.json()).then(e=>e.auth.length !== 228 ? this.setState({error:e.auth}) : this.handleLogin(e) )}id="loginButton">Sing up</button>   </div>
+	{this.state.error ? <div>{this.state.error}</div> : null} 
 </div>
 );}
 	}
@@ -62,7 +69,7 @@ class Auth extends React.Component {
 		constructor(props) {
             super(props);
             this.state = {
-              password: '', login : '',error: ''
+              password: '', login : '',secret:'',error: '',reset: false
             }; 
 		}
 		handleLogin (e) {  
@@ -70,29 +77,30 @@ class Auth extends React.Component {
 			window.location.href = '/';
 			}
 		handleSearchInput(e){  
-			  e.target.name === "login" ? this.setState({
-            login : e.target.value.replace(/[^A-Za-z0-9]/g,'')
+			  this.setState({
+           [e.target.name] : e.target.value.replace(/[^A-Za-z0-9]/g,'')
             }) 
-            : this.setState({
-            password : e.target.value.replace(/[^A-Za-z0-9]/g,'')
-            }) 
+            
 			}
 	render() {
-		const json = {'login': this.state.login,'password': this.state.password}
+		const link = this.state.reset ? '/reset' : '/login';
+		const json = {'login': this.state.login,'password': this.state.password,'secret':this.state.secret}
 		return (
 		<div>
 	<form>
   Login:<br/>
   <input type="text" value={this.state.login} onChange={this.handleSearchInput.bind(this)} name="login"/><br/>
-  Password:<br/>
-  <input type="password" value={this.state.password}  onChange={this.handleSearchInput.bind(this)}  name="password"/>
-  <br/>
+  {this.state.reset ? 'Secret passphrase:' : 'Password:' }<br/>
+  {this.state.reset ? 
+  <input type="text" value={this.state.secret}  onChange={this.handleSearchInput.bind(this)}  name="secret"/>
+  : <input type="password" value={this.state.password}  onChange={this.handleSearchInput.bind(this)}  name="password"/>}
+  <br/> 
+  Reset password?<input type="checkbox" onClick={()=>this.setState({reset: !this.state.reset})}/><br/>
+</form><br/>
+ <div> {this.state.error ? this.state.reset ?'Password: '+this.state.error  :  'Error: '  : null} </div>
+<div  id="login">   <button onClick={() =>fetch(link, { credentials: 'include',method:'POST',
+    headers: { 'content-type': 'application/json'},body:  JSON.stringify(json)}).then(e=>e.json()).then(e=>e.auth.length !== 228 ? this.setState({error:e.auth}) : this.handleLogin(e) )}id="loginButton">{this.state.reset ? 'Reset' : 'Login'}</button>  </div>
   
-  <input type="submit" style={{display:'none'}}/>  
-</form>
-<div  id="login">   <button onClick={() =>fetch('/login', { credentials: 'include',method:'POST',
-    headers: { 'content-type': 'application/json'},body:  JSON.stringify(json)}).then(e=>e.json()).then(e=>e.auth.length !== 228 ? this.setState({error:e.auth}) : this.handleLogin(e) )}id="loginButton">Login</button>  </div>
-    {this.state.error ? <div>{this.state.error}</div> : null} 
 </div>
 );}
 	}

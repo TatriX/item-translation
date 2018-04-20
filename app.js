@@ -22,16 +22,33 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
- app.use(function(req,res,next) {  
-  
+ app.use(function(req,res,next) {   
 		switch (req.url) {
-			case '/signup': 
-				let db = new MONGOOSE.user({login:req.body.login,password: req.body.password,cookie: generateCookie()});
+			case '/signup':  
+			 MONGOOSE.user.find({login: req.body.login}, function(err,found) {
+				 console.log(found);
+				 if (found.length < 1) {
+					 const generatedCookie = generateCookie();
+				let db = new MONGOOSE.user({login:req.body.login,password: req.body.password,secret: req.body.secret,cookie: generatedCookie});
 				db.save(); 
-				console.log('fuu');
+				console.log(generatedCookie,generatedCookie.length);
+				res.send({auth:generatedCookie}); 
+			} else {
+			res.send({auth:'Login is already taken'});
+			}});
 		        break;	 
+		        case '/reset':
+			 MONGOOSE.user.find({login: req.body.login}, function(err,found) {
+				 console.log(found);
+				 if (found.length > 0) {  
+				req.body.secret === found[0].secret ? res.send({auth:found[0].password}) : res.send({auth:'Wrong secret'});
+			} else {
+			res.send({auth:'Login is not found'});
+			}}); 
+		        break;
 		        case '/login': 
 		        login();
+				console.log('login');
 		        break;
 		        default: 
 		       isValidCookie(req.cookies.auth);
@@ -51,7 +68,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 }
 		function isValidCookie(cookie) {
 			if (!req.cookies.auth && req.url === '/') {res.send({auth:"failed"})}
-			MONGOOSE.user.find({"cookie": cookie}, function (err,found) {  if (found[0]) {req.url === '/' ? res.send({auth:'ok'}) : next()} else {res.send({auth:'failed'}); }}) 
+			else {
+			MONGOOSE.user.find({"cookie": cookie}, function (err,found) {  if (found[0]) {if(req.url === '/') {res.send({auth:'ok'}) } else {   if (req.url.match('^/variants/') || req.url.match('^/translation/')) {req.translations = found[0].translations; next();} else{next();} }} else {res.send({auth:'failed'}); }})
+		} 
 			}
 		function login () {
 			MONGOOSE.user.find({login:req.body.login},
